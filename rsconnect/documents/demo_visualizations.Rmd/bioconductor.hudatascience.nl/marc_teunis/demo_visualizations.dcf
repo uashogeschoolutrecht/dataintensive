@@ -1,0 +1,13 @@
+name: demo_visualizations
+title: demo_visualizations
+username: marc_teunis
+account: marc_teunis
+server: bioconductor.hudatascience.nl
+hostUrl: http://bioconductor.hudatascience.nl:84/__api__
+appId: 12
+bundleId: 38
+url: http://bioconductor.hudatascience.nl:84/content/12/
+when: 1566909006.40473
+asMultiple: FALSE
+asStatic: FALSE
+additionalFiles: code/ggqq.R

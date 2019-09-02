@@ -1,10 +1,19 @@
 ---
 title: "Hands-on - Visualizations with R"
-subtitle: "SURF Seminar: Data intensive research in practice: An introduction"
 author: "Marc A.T. Teunis; Jan-Willem Lankhaar; Jonathan de Bruin"
 date: "November 6th 2018"
 output:
-  html_document
+  html_document:
+    toc: true
+    toc_float: true
+    theme: united
+    highlight: tango 
+subtitle: "Seminar: Data intensive research in practice: An introduction"
+resource_files:
+- data/heights.csv
+- data/heights_outliers.csv
+- images/hex-ggplot2.png
+- code/ggqq.R
 ---
 
 ```{r setup, include=FALSE}
@@ -15,14 +24,14 @@ knitr::opts_chunk$set(echo = TRUE,
                       fig.width = 5, fig.height = 3.5)
 ```
 
-```{r, root_1, include=FALSE}
-## defines the root of the project for later use
-require("rprojroot") || utils::install.packages("rprojroot")
-library(rprojroot)
-root <- find_root_file(criterion = is_rstudio_project)
+## A recreation of the Gapminder Bubble Graph, with facets per continent
+```{r}
+source(here::here("code", "08_gganimate_demo.R"))
+gapminder_animation
 ```
 
-## Reference
+
+## Resources & references
 https://simplystatistics.org/2018/01/22/the-dslabs-package-provides-datasets-for-teaching-data-science/
 
 https://github.com/rbind/simplystats
@@ -30,15 +39,16 @@ https://github.com/rbind/simplystats
 [link to free online book "r4ds":](https://r4ds.had.co.nz/)
 "R for Data Science", Hadley Wickham & Garret Grolemund
 
-
 ## Gapminder
 https://www.gapminder.org/tools/#$state$time$value=2018;;&chart-type=bubbles 
 
 ## ggplot2
 The ggplot2 package in R is the best plotting system for R. It's syntax is an implementation of the 'grammar of graphics' and all plots in this demo are created by using ggplot2.
 
+The 3rd detion of the free online version resource for ggplot2:
+["ggplot2 Elegant Graphics for Data Analysis"](https://ggplot2-book.org/index.html)
 ```{r, echo=FALSE}
-knitr::include_graphics(path = file.path(root, "images",
+knitr::include_graphics(path = here::here("images",
                                          "hex-ggplot2.png"))
 ```
 
@@ -749,8 +759,7 @@ This dataset contains 1192 observations on self-reported:
  - `race` 
  
 ```{r}
-heights_data <- read_csv(file = file.path(root,
-                                          "data",
+heights_data <- read_csv(file = here::here("data",
                                           "heights_outliers.csv"))
 
 heights_data
@@ -825,11 +834,164 @@ heights_data %>%
 
 ```
 
+## A formal check to detect an outlier - handle with care
+The best way to spot and take care of an outlier (**you never delete an outlier unsubstantiated!!**) is to create multiple visualizations as decribed above. However, there is a formal, simple statistical apporach to assess whether an observation is an outlier.
+The apporach below can only be used to detect a single outlier in a numeric vector. For more complex (multivariate) situations see e.g.: http://r-statistics.co/Outlier-Treatment-With-R.html 
+
+### The Dixon's Q Test for detecting outliers
+The `{outliers}` package contains a number of tools. Here we will demonstrate the `outlier()` and `dixon.test()` functions. 
+For more information on the DQT, see: https://www.statisticshowto.datasciencecentral.com/dixons-q-test/
+
+### `outlier()` function
+This function finds the value with largest difference between it and sample mean, which can be an outlier.
+
+We will walk trough a simple exercise that first shows the result of the `outlier()` function and than we calculate it by hand
+
+First we create dummy data for a triplicate series of measurements. We assume 5 measurement values, replicated three times, containing one outlier. We also assume is was a concentration depended series in which the index indicates the used concentration.
+```{r}
+set.seed(123)
+## create data
+random_numbers <- rnorm(n = 15, mean = 2.5, sd = 0.9) 
+## inject outlier
+random_numbers[4] <- 9.54
+## define triplicates
+triplicates <- rep(1:3, times = 5)
+index <- rep(1:5, times = 3)
+
+## put in dataframe
+measured_data <- tibble(measured = random_numbers, replicate = triplicates,
+                        index = index)
+measured_data
+
+## sort data
+measured_data %>% 
+  arrange(desc(measured))
+```
+
+## Plotting the data reveals the outlier.
+```{r}
+## plot
+measured_data %>% 
+#  enframe() %>%
+  ggplot(aes(x = index, y = measured)) +
+  geom_point() +
+  geom_point(data = dplyr::filter(.data = measured_data, measured > 5), 
+             colour = "red", size = 6, shape = 4)
+```
+
+## Identify with `outliers::outlier()`
+```{r}
+outliers::outlier(measured_data$measured)
+```
+
+### Identify with `outliers::dixon.test()`
+```{r}
+## note that these functions from the {outliers} package take a vector (use $)
+outliers::dixon.test(measured_data$measured)
+```
+The test is significant against the NULL hypothesis that the highest value is not an outlier. We can conclude that this NULL hypothesis does not hold on the basis of the significant p-value < 0.05
+
+### Manual calculations:
+
+*`outlier()`*
+
+```{r}
+mean_vctr <- mean(measured_data$measured)
+
+distance <- measured_data$measured - mean_vctr
+
+ind <- distance == max(distance)
+
+measured_data[ind,]
+
+```
+
+*`dixon.test()`*
+
+The Dixon's Q Test can be calculated manually following the following procedure:
+
+How to Run Dixon’s Q Test (R10).
+
+Note: make sure your data set is normally distributed before running the test; for example, run a Shapiro-Wilk test. Running it on different distributions will lead to erroneous results. An extreme value may throw off any test for normality, so try running that test without the suspect data item. If your data set still doesn’t meet the assumption of normality after running a test for it, then you should not run Dixon’s Q Test. 
+
+Note that for very small sample sizes the assumtion for Normal distribution usually does not hold. We will see more formal way of establishing Normal distribution below. 
+
+**Caution: the test should not be used more than once for the same set of data.**
+
+
+To perform the calculations:
+
+Step 1: Sort your data into ascending order (smallest to largest).
+
+Step 2 :Find the Q statistic using the following formula:
+
+$Qexp = \frac{x2 - x1}{xn - x1}$
+
+Where 
+
+ * $x1$ is the smallest (suspect) value
+ * $x2$ is the second smallest value 
+ * $xn$ is the largest value
+
+
+Dixon’s Q Test: Definition, Step by Step Examples + Q Critical Values Tables
+
+Find Outliers > Dixon’s Q Test
+What is Dixon’s Q Test?
+
+Dixon’s Q test, or just the “Q Test” is a way to find outliers in very small, normally distributed, data sets. Small data sets are usually defined as somewhere between 3 and 7 items. It’s commonly used in chemistry, where data sets sometimes include one suspect observation that’s much lower or much higher than the other values. Keeping an outlier in data affects calculations like the mean and standard deviation, so true outliers should be removed.
+
+Dixon came up with many different equations to find true outliers. The most commonly used one is called the R10 or simply the “Q” version, which is used to test if one single value is an outlier in a sample size of between 3 and 7. Dean and Dixon did suggest various other formulas in a later paper, but these are not commonly used. For a full list of alternate formulas for different sample sizes (up to about 30), go to: Dixon’s Test, Alternate Formulas and Tables.
+How to Run Dixon’s Q Test (R10).
+
+Note: make sure your data set is normally distributed before running the test; for example, run a Shapiro-Wilk test. Running it on different distributions will lead to erroneous results. An extreme value may throw off any test for normality, so try running that test without the suspect data item. If your data set still doesn’t meet the assumption of normality after running a test for it, then you should not run Dixon’s Q Test,
+
+Caution: the test should not be used more than once for the same set of data.
+
+Step 1: Sort your data into ascending order (smallest to largest).
+167, 177, 180, 181, 185, 188, 189.
+
+Step 2 :Find the Q statistic using the following formula:
+dixon's q test statistic
+
+Where:
+
+    x1 is the smallest (suspect) value,
+    x2 is the second smallest value,
+    and xn is the largest value.
+
+Step 3: Find the Q critical value in the Q table (see below). For a sample size of 3 and an alpha level of 5%, the critical value is 0.970.
+
+Step 4: Compare the Q statistic from Step 2 with the Q critical value in Step 3. If the Q statistic is greater than the Q critical value, the point is an outlier.
+
+Let's try it on our `measured_data`
+
+```{r}
+measured_data_ranked <- measured_data %>%
+  arrange(measured) 
+measured_data_ranked$measured
+
+x1 <- measured_data_ranked$measured[1]
+x2 <- measured_data_ranked$measured[2]
+xn <- max(measured_data_ranked$measured)
+
+Qexp = (x2-x1) / (xn-x1)
+
+##
+0.5/8
+
+```
+
+
+
+
+
 
 ## Checking normality with a qqplot
+a qqplot provides a visual aid to assess whether a distribution is approaching normality
 ```{r}
-## a qqplot provides a visual aid to assess whether a distribution is approaching normality
-source(file = file.path(root, "code", "ggqq.R"))
+## 
+source(file = here::here("code", "ggqq.R"))
 height_data_outlier_removed <- heights_data %>%
   dplyr::filter(height < 100)
   gg_qq(height_data_outlier_removed$height) 
