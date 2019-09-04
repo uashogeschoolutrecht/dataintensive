@@ -5,9 +5,9 @@ account: marc_teunis
 server: bioconductor.hudatascience.nl
 hostUrl: http://bioconductor.hudatascience.nl:84/__api__
 appId: 12
-bundleId: 38
-url: http://bioconductor.hudatascience.nl:84/content/12/
-when: 1566909006.40473
+bundleId: 49
+url: http://bioconductor.hudatascience.nl:84/dataintensive/
+when: 1567421520.77528
 asMultiple: FALSE
 asStatic: FALSE
-additionalFiles: code/ggqq.R
+additionalFiles: code/08_gganimate_demo.R
