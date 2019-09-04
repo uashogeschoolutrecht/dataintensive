@@ -2,14 +2,9 @@
 title: "Hands-on - Exploring data with R"
 author: "Dr. Marc A.T. Teunis; Dr. Jan-Willem Lankhaar"
 date: "November 6th 2018"
-output:
-  html_document:
-    highlight: tango
-    theme: united
-    toc: yes
-    toc_float: yes
-    toc_depth: 2
 subtitle: 'Borrelsessie IM/ICT'
+always_allow_html: yes
+output: github_document
 resource_files:
 - data/heights.csv
 - data/heights_outliers.csv
@@ -20,22 +15,52 @@ resource_files:
 
 _From R. A. Fisher, 1938: To consult the statistician after an experiment is finished is often merely to ask him to conduct a post mortem examination. He can perhaps say what the experiment died of_
 
+## Attribution 
+This work can be reproduced under licence CC BY-NC, assuming you give attribution to the original creators. See authors of this document and the 'resources' document in the Github repo for more details.
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE,
                       warning = FALSE,
                       error = FALSE,
                       message = FALSE, 
                       fig.width = 5, fig.height = 3.5)
+
+ggplot2::theme_set(ggplot2::theme_bw())
+
 ```
 
-# Some inspiring examples
+## Loading the packages used in this demo
+```{r}
+library(tidyverse)
+library(gganimate)
+library(dslabs)
+library(lubridate)
+library(ggplot2)
+library(gapminder)
+library(gganimate)
+library(gifski)
+library(tidyverse)
+
+```
 
 ## A recreation of the Gapminder Bubble Graph, with facets per continent
-```{r, eval=FALSE}
-source(here::here("code", "08_gganimate_demo.R"))
+```{r, eval=TRUE}
+
+gapminder_animation <- ggplot(gapminder, aes(gdpPercap, lifeExp, size = pop, colour = country)) +
+  geom_point(alpha = 0.7, show.legend = FALSE) +
+  scale_colour_manual(values = country_colors) +
+  scale_size(range = c(2, 12)) +
+  scale_x_log10() +
+  facet_wrap(~ continent) +
+  # Here comes the gganimate specific bits
+  labs(title = 'Year: {frame_time}', 
+       x = 'GDP per capita', 
+       y = 'life expectancy') +
+  transition_time(year) + ## regulation the actual layers for the animation
+  ease_aes('linear')
+
 gapminder_animation
 ```
-
 
 ## Resources & references
 https://simplystatistics.org/2018/01/22/the-dslabs-package-provides-datasets-for-teaching-data-science/
@@ -68,14 +93,6 @@ citation(package = "dslabs")
 ## Installing data package 
 ```{r, eval=FALSE}
 install.packages("dslabs")
-```
-
-## Loading the data package `{dslabs}` and other packages used in this demo
-```{r}
-library(tidyverse)
-library(gganimate)
-library(dslabs)
-library(lubridate)
 ```
 
 ## Loading a specific dataset by name
@@ -155,8 +172,9 @@ The gapminder dataset contains a number of measurements on health and income out
 
 ## Inspecting the dataset with R
 ```{r}
+data("gapminder", package = "dslabs")
+head(gapminder)
 gapminder <- gapminder %>% as_tibble()
-gapminder %>% head(2)
 names(gapminder)
 ```
 

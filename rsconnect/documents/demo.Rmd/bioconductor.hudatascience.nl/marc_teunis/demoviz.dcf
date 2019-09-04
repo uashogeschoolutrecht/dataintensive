@@ -1,0 +1,12 @@
+name: demoviz
+title: demoviz
+username: marc_teunis
+account: marc_teunis
+server: bioconductor.hudatascience.nl
+hostUrl: http://bioconductor.hudatascience.nl:84/__api__
+appId: 15
+bundleId: 50
+url: http://bioconductor.hudatascience.nl:84/content/15/
+when: 1567606343.03185
+asMultiple: FALSE
+asStatic: FALSE
