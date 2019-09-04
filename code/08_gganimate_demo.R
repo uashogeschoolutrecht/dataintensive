@@ -20,6 +20,7 @@ library(gapminder)
 library(gganimate)
 library(gifski)
 library(tidyverse)
+library(png)
 
 ## setting them to black and white for all ggplots to come
 theme_set(theme_bw())
