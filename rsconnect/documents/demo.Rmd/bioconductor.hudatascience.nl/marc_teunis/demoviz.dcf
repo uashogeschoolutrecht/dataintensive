@@ -5,8 +5,8 @@ account: marc_teunis
 server: bioconductor.hudatascience.nl
 hostUrl: http://bioconductor.hudatascience.nl:84/__api__
 appId: 15
-bundleId: 50
+bundleId: 56
 url: http://bioconductor.hudatascience.nl:84/content/15/
-when: 1567606343.03185
+when: 1568283791.047
 asMultiple: FALSE
 asStatic: FALSE

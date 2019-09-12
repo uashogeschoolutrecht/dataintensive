@@ -1,10 +1,15 @@
 ---
 title: "Hands-on - Exploring data with R"
-author: "Dr. Marc A.T. Teunis; Dr. Jan-Willem Lankhaar"
+author: "Dr. Marc A.T. Teunis; Emiel Korteweg; Dr. Jan-Willem Lankhaar"
 date: "12 September 2019"
 subtitle: 'Borrelsessie IM/ICT'
 always_allow_html: yes
-output: github_document
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: united
+    highlight: tango
 resource_files:
 - data/heights.csv
 - data/heights_outliers.csv
@@ -39,7 +44,7 @@ library(lubridate)
 library(ggplot2)
 library(gapminder)
 library(gganimate)
-library(gifski)
+# library(gifski)
 library(tidyverse)
 
 ```
@@ -54,7 +59,7 @@ Every data cycle starts with a question / problem:
  - Conclusion
 
 ```{r}
- DiagrammeR::grViz("
+DiagrammeR::grViz("
 digraph rmarkdown {
   Problem -> Plan
   Plan -> Data
@@ -100,13 +105,17 @@ dat %>% mutate(state = reorder(state, desc(state))) %>%
 
 Try changing the line in the code chunk above from
 
-`the_disease <- "Measles"` (_Mazelen_ in Dutch)  to
+`the_disease <- "Measles"` (_Mazelen_ in Dutch) to
 
 `the_disease <- "Smallpox"` (_Pokken_ in Dutch) and rerun the code.
 
-Can you find out which part of the code above plots the vertical line and prints the words "Vaccine introduced". Try to adapt the figure for the Smallpox data: The introduction of the smallpox vaccine was already as early as in 1940. **TIP** You will need to change the year 1963 twice to 1940 in order for the new figure to be correct for the Smallpox subset of the data. Try adapting the code and rerun the code chunk.
+Can you find out which part of the code above plots the vertical line and prints the words "Vaccine introduced". Try to adapt the figure to the Smallpox data: The introduction of the smallpox vaccine was already as early as in 1940. 
 
-Question: When did vaccination against smallpox stop? Try googling for the answer! 
+**TIP** 
+
+You will need to change the year 1963 twice to 1940 in order for the new figure to be correct for the Smallpox subset of the data. Try adapting the code and rerun the code chunk.
+
+**Question:** When did vaccination against smallpox stop? Try googling for the answer! 
 
 ## Exploring the Gapminder dataset in R
 
@@ -115,8 +124,9 @@ The gapminder dataset contains a number of measurements on health and income out
 ## Inspecting the dataset with R
 ```{r}
 data("gapminder", package = "dslabs")
-head(gapminder)
-gapminder <- gapminder %>% as_tibble()
+gapminder <- gapminder %>% 
+  as_tibble()
+gapminder
 names(gapminder)
 ```
 
@@ -232,10 +242,6 @@ shape_plot <- gapminder %>%
 shape_plot
 ```
 
-#### **Do it youself**
-
- - Try removing the `as_factor(as.character(year))` call and replace this by only `year` above and rerun the plot, what happened?
-
 ### 5. Facetting
 
 Create panels for 'categorical' or so-called 'factor' variables in R
@@ -289,7 +295,7 @@ labels_plot <- gapminder %>%
 labels_plot
 ```
 
-### 7. Displaying a model / relationship that represents the data (and not show the actual data itself) 
+### 7. Displaying a model 
 ```{r}
 ## Model
 lm <- gapminder %>% lm(formula = life_expectancy ~ fertility)
@@ -387,7 +393,6 @@ dslabs::gapminder %>%
   
 ```
 
-
 # Ranking data
 ```{r}
 ranking_plot <- gapminder %>%
@@ -406,49 +411,11 @@ ranking_plot <- gapminder %>%
 ranking_plot
 ```
 
-# Let's look at a time series
-We filter for "Americas" and "Oceania" and look at `life_expectancy` over the years.
-```{r}
-## without summarizing for countries
-gapminder$continent %>% as_factor() %>% levels()
-gapminder %>% 
-  dplyr::filter(continent == "Americas" | continent == "Oceania") %>%
-  ggplot(aes(x = year,
-             y = life_expectancy)) +
-  geom_line(aes(group = continent,
-                colour = continent))
-```  
-
-**Obviously something went wrong here. Please, discuss with your neighbour what you think happened or needs to be done to fix this (without looking ahead ;-) )**
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ## Grouping
-We can see what happened if we plot individual datapoints
+Plot individual datapoints over a group aesthetic. Note the outliers!! 
 ```{r}
 gapminder %>% 
-  dplyr::filter(continent == "Americas" | continent == "Oceania") %>%
+  dplyr::filter(continent == "Americas" | continent == "Africa") %>%
   ggplot(aes(x = year,
              y = life_expectancy)) +
   geom_point(aes(colour = country)) +
@@ -462,7 +429,7 @@ gapminder %>%
 ```{r}
 gapminder$continent %>% as_factor() %>% levels()
 gapminder %>% 
-  dplyr::filter(continent == "Americas" | continent == "Oceania") %>%
+  dplyr::filter(continent == "Americas" | continent == "Africa") %>%
   group_by(continent, year) %>%
   summarise(mean_life_expectancy = mean(life_expectancy)) %>%
   ggplot(aes(x = year,
@@ -472,7 +439,7 @@ gapminder %>%
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 
-# Statistical proof?
+# Statistical inference
 ```{r}
 
 df <- gapminder %>% 
