@@ -1,0 +1,17 @@
+---
+title: "Gapminder Bubbles"
+author: "Marc A.T. Teunis"
+date: "12-9-2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+source(here::here(
+  "code",
+  "08_gganimate_demo.R"))
+```
+

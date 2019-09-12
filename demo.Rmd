@@ -196,7 +196,7 @@ This can be fixed in several ways:
  - Reduce the data in the plot
  - Mapping a shape to a variable
  - Add noise (`"jitter"`) to points
- - Facetting - create panels for 'categorical' or so-called 'factor' variables in R
+ - Facetting; create panels for 'categorical' or so-called 'factor' variables in R
  - Summarize the data
  - Displaying a model / relationship that represents the data (and not sho the actual data itself) 
  - Or any combination of the above strategies
