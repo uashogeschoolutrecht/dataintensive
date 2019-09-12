@@ -223,7 +223,7 @@ reduce_data_plot <- gapminder %>%
 reduce_data_plot
 ```
 
-### **Discuss with you neighbour:**
+### **Discuss with your neighbour:**
 
  - What does the the `aes()` part of the `geom_point()` do?
  
