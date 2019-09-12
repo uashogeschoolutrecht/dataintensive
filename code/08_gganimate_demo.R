@@ -28,13 +28,17 @@ theme_set(theme_bw())
 
 ## ------------------------------------------------------------------------
 
-gapminder_animation <- ggplot(gapminder, aes(gdpPercap, lifeExp, size = pop, colour = country)) +
+gapminder_animation <- ggplot(gapminder, aes(gdp, 
+                                             life_expectancy, 
+                                             size = population, 
+                                             colour = country)) +
   geom_point(alpha = 0.7, show.legend = FALSE) +
-  scale_colour_manual(values = country_colors) +
+#  scale_colour_manual(values = country_colors) +
   scale_size(range = c(2, 12)) +
   scale_x_log10() +
   facet_wrap(~ continent) +
-  # Here comes the gganimate specific bits
+
+    # Here comes the gganimate specific bits
   labs(title = 'Year: {frame_time}', x = 'GDP per capita', y = 'life expectancy') +
   transition_time(year) + ## regulation the actual layers for the animation
   ease_aes('linear')
