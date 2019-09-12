@@ -1,7 +1,7 @@
 ---
 title: "Hands-on - Exploring data with R"
 author: "Dr. Marc A.T. Teunis; Dr. Jan-Willem Lankhaar"
-date: "November 6th 2018"
+date: "12 September 2019"
 subtitle: 'Borrelsessie IM/ICT'
 always_allow_html: yes
 output: github_document
@@ -19,6 +19,7 @@ _From R. A. Fisher, 1938: To consult the statistician after an experiment is fin
 This work can be reproduced under licence CC BY-NC, assuming you give attribution to the original creators. See authors of this document and the 'resources' document in the Github repo for more details.
 
 ```{r setup, include=FALSE}
+## knitr global settings
 knitr::opts_chunk$set(echo = TRUE,
                       warning = FALSE,
                       error = FALSE,
@@ -92,7 +93,7 @@ citation(package = "dslabs")
 
 ## Installing data package 
 ```{r, eval=FALSE}
-install.packages("dslabs")
+# install.packages("dslabs")
 ```
 
 ## Loading a specific dataset by name
