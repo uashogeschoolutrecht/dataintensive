@@ -44,65 +44,6 @@ library(tidyverse)
 
 ```
 
-## A recreation of the Gapminder Bubble Graph, with facets per continent
-```{r, eval=TRUE}
-
-gapminder_animation <- ggplot(gapminder, aes(gdpPercap, lifeExp, size = pop, colour = country)) +
-  geom_point(alpha = 0.7, show.legend = FALSE) +
-  scale_colour_manual(values = country_colors) +
-  scale_size(range = c(2, 12)) +
-  scale_x_log10() +
-  facet_wrap(~ continent) +
-  # Here comes the gganimate specific bits
-  labs(title = 'Year: {frame_time}', 
-       x = 'GDP per capita', 
-       y = 'life expectancy') +
-  transition_time(year) + ## regulation the actual layers for the animation
-  ease_aes('linear')
-
-gapminder_animation
-```
-
-## Resources & references
-https://simplystatistics.org/2018/01/22/the-dslabs-package-provides-datasets-for-teaching-data-science/
-
-https://github.com/rbind/simplystats
-
-[link to free online book "r4ds":](https://r4ds.had.co.nz/)
-"R for Data Science", Hadley Wickham & Garret Grolemund
-
-## The ggplot2 packages
-
-I find the the ggplot2 package for R the best plotting system for R. It's syntax is an implementation of the 'grammar of graphics' and all plots in this demo are created by using ggplot2.
-
-To cite ggplot2 in your work run `citation("ggplot2")` in R to get the reference details.
-
-The 3rd edition of the free online book resource for ggplot2:
-["ggplot2 Elegant Graphics for Data Analysis"](https://ggplot2-book.org/index.html)
-```{r, echo=FALSE}
-knitr::include_graphics(path = here::here("images",
-                                         "hex-ggplot2.png"))
-```
-
-## Citations
-```{r, eval=FALSE}
-citation(package = "ggplot2")
-citation(package = "tidyverse")
-citation(package = "dslabs")
-```
-
-## Installing data package 
-```{r, eval=FALSE}
-# install.packages("dslabs")
-```
-
-## Loading a specific dataset by name
-```{r}
-data(package = "dslabs")
-data("us_contagious_diseases", package = "dslabs")
-unique(us_contagious_diseases$disease)
-```
-
 ## Measles example
 Every data cycle starts with a question / problem:
 
@@ -125,7 +66,7 @@ digraph rmarkdown {
 
 ```
  
-## Was the introduction of the vaccination against the measles effective?
+## Was the introduction of the vaccination against the measles effective in the USA?
 ```{r}
 library(dslabs)
 data(us_contagious_diseases)
@@ -163,7 +104,7 @@ Try changing the line in the code chunk above from
 
 `the_disease <- "Smallpox"` (_Pokken_ in Dutch) and rerun the code.
 
-Can you find out which part of the code above plots the vertical line and prints the words "Vaccine introduced". Try to adapt the figure for the Smallpox data: The introduction of the smallpox vaccine was already as early as in 1940. **TIP** You will need to change the year 1963 twice to 1940 in oder for the new figure to be correct for the Smallpox subset of the data. Try adapting the code and rerun the code chunk.
+Can you find out which part of the code above plots the vertical line and prints the words "Vaccine introduced". Try to adapt the figure for the Smallpox data: The introduction of the smallpox vaccine was already as early as in 1940. **TIP** You will need to change the year 1963 twice to 1940 in order for the new figure to be correct for the Smallpox subset of the data. Try adapting the code and rerun the code chunk.
 
 Question: When did vaccination against smallpox stop? Try googling for the answer! 
 
@@ -188,7 +129,7 @@ gapminder %>%
 ```
 
 # Fixing overplotting
-We call this 'overplotting'.
+We call this overlay of points 'overplotting'.
 
 This can be fixed in several ways:
 
@@ -197,6 +138,7 @@ This can be fixed in several ways:
  - Reduce the data in the plot
  - Mapping a shape to a variable
  - Add noise (`"jitter"`) to points
+ - Choosing different `geom_`
  - Facetting; create panels for 'categorical' or so-called 'factor' variables in R
  - Summarize the data
  - Displaying a model / relationship that represents the data (and not sho the actual data itself) 
@@ -204,7 +146,7 @@ This can be fixed in several ways:
 
 __Basically you map an `aesthetic` (`aes()`) or a `characteristic` to a variable__
  
-Let's go over these overplotting methods one by one 
+Let's go over a few of these overplotting methods  
 
 ### 1. Overplotting: Reducing transparency (`alpha`) of points or lines in the data
 ```{r}
@@ -232,6 +174,20 @@ gapminder %>%
 
 ```
 
+#### Choose a different `geom_`
+```{r}
+# install.packages("ggpointdensity")
+library(ggpointdensity)
+
+gapminder %>% 
+  ggplot(aes(x = fertility,
+             y = life_expectancy)) +
+  stat_density2d(aes(fill = continent), geom = 'polygon', alpha = 0.5) +
+  guides(fill = guide_legend(override.aes = list(alpha = 1))) 
+  
+```
+
+
 #### **Do it yourself:**
 
  - Try adjusting some of the arguments in the previous `ggplot2` call. 
@@ -240,7 +196,7 @@ For example, adjust the `alpha = ...` or change the variable in `x = ...`, `y = 
  - Show and discuss the resulting plot with your neighbour
  - What do you think this part does: 
  
- `guides(colour = guide_legend(override.aes = list(alpha = 1)))`
+ `guides(... = guide_legend(override.aes = list(alpha = 1)))`
  
  - Try to find out by disabling with `#`
 
@@ -260,18 +216,7 @@ reduce_data_plot
 ### **Discuss with you neighbour:**
 
  - What does the the `aes()` part of the `geom_point()` do?
- - Compare the code below with the code above, can you spot the difference, what is the advantage of the code below?
  
-```{r, eval=FALSE}
-reduce_data_plot <- gapminder %>% 
-  filter(continent == "Africa" | continent == "Europe") %>%
-  ggplot(aes(x = fertility,
-             y = life_expectancy, colour = continent)) +
-  geom_point(alpha = 0.2) +
-  ## override the alpha setting for the points in the legend:
-  guides(colour = guide_legend(override.aes = list(alpha = 1))) 
-```
-
 ### 4. Mapping a shape to a variable
 ```{r}
 ## or e.g. show only two years and map a shape to continent
@@ -290,7 +235,6 @@ shape_plot
 #### **Do it youself**
 
  - Try removing the `as_factor(as.character(year))` call and replace this by only `year` above and rerun the plot, what happened?
-
 
 ### 5. Facetting
 
@@ -364,7 +308,7 @@ predicted_df <- data.frame(gapminder_pred = predict(lm, gapminder),
 model_plot <- gapminder %>% 
   ggplot(aes(x = fertility,
              y = life_expectancy)) +
-#  geom_point(alpha = 0.03) +
+  geom_point(alpha = 0.03) +
   geom_line(data = predicted_df, aes(x = fertility, 
                                      y = gapminder_pred),
             colour = "darkred", size = 1)
@@ -399,88 +343,8 @@ gapminder %>%
   theme_bw()
 ```
 
-## Recap **Discuss with your neighbour**
-Which tricks can we use to reduce the dimensionality of the plotted data (prevent overpltting)?
 
-Try listing at least 6 methods:
-
-## Relation between `gdp`, Gross Domestic Product and `infant_mortality` rate. 
-https://en.wikipedia.org/wiki/Gross_domestic_product
-Wikipedia: Gross Domestic Product (GDP) is a monetary measure of the market value of all the final goods and services produced in a period of time, often annually or quarterly. Nominal GDP estimates are commonly used to determine the economic performance of a whole country or region, and to make international comparisons. 
-```{r}
-gdp_infant_plot <- gapminder %>%
-  dplyr::filter(continent == "Europe" | continent == "Africa") %>%
-  ggplot(aes(x = gdp, 
-             y = infant_mortality)) +
-  geom_point() 
-gdp_infant_plot
-```
-
-# Adding a bit of colour
-The figure above does not provide any clue on a possible difference between Europe and Africa, nor does it convey any information on trends over time.
-
-```{r}
-colour_to_continent <- gapminder %>%
-  dplyr::filter(continent == "Europe" | continent == "Africa") %>%
-  ggplot(aes(x = gdp, 
-             y = infant_mortality)) +
-  geom_point(aes(colour = continent))
-
-colour_to_continent
-```
-
-## Adding facets
-Let's investigate whether things have improved over time. We compare 1960 to 2010 by using a panel of two figures. Adding simply `facet_wrap( ~ facetting_variable)` will do the trick.
-
-## **Discuss with your neighbour:**
-
-Without looking ahead try to contruct a plot that conveys information on the `gdp` per continent, over time. Try to recycle some of the examples above.  
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-```{r}
-facets_gdp_infant <- gapminder %>%
-  dplyr::filter(continent == "Europe" | continent == "Africa",
-                year == "1960" | year == "2010") %>%
-  ggplot(aes(x = gdp, 
-             y = infant_mortality)) +
-  geom_point(aes(colour = continent)) +
-  facet_wrap(~ year) +
-  theme(axis.text.x = element_text(angle = -90, hjust = 1))
-  
-
-facets_gdp_infant
-```
-
-# Mapping to continuous variables
+# Time series
 So far we have been mapping colours and shapes to categorical variables. You can also map to continuous variables though.
 ```{r}
 continuous <- gapminder %>%
@@ -498,19 +362,6 @@ continuous <- gapminder %>%
 continuous
 ```
 
-## **Discuss with your neighbour**
-Try plotting the `infant_mortality` against the filtered years for the same countries as the code above (Netherlands, India, China), recycling some of the code above. Discuss the resulting graph in the light of the life_expectancy graph, what do you think about the the developments in China? 
-
-Want to know more? see: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4331212/
-Babxiarz, 2016
-
-## **Discuss with your neighbour**
-Analyze the following code chunk: try running line by line to see what happens:
-
- - How many observations are we plotting here?
- - How many variables are we plotting?
- - Try adding or removing variables to the `group_by()` statement, what happens if you do?
-
 ## Summarize per continent and sum population
 ```{r}
 population_plot <- gapminder %>% 
@@ -524,6 +375,18 @@ population_plot <- gapminder %>%
                   colour = continent))
 population_plot
 ```
+
+# Filtering for one country
+```{r}
+dslabs::gapminder %>%
+  dplyr::filter(country == "Rwanda") %>%
+  ggplot(aes(x = year, y = life_expectancy)) +
+  geom_point() +
+  geom_line() +
+  ggtitle("Life expectancy for Rwanda over the years") 
+  
+```
+
 
 # Ranking data
 ```{r}

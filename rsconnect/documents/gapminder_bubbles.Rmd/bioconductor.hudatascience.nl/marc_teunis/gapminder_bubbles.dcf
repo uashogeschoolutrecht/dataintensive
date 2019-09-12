@@ -1,0 +1,12 @@
+name: gapminder_bubbles
+title: gapminder_bubbles
+username: marc_teunis
+account: marc_teunis
+server: bioconductor.hudatascience.nl
+hostUrl: http://bioconductor.hudatascience.nl:84/__api__
+appId: 17
+bundleId: 52
+url: http://bioconductor.hudatascience.nl:84/content/17/
+when: 1568273835.23979
+asMultiple: FALSE
+asStatic: TRUE
